@@ -210,7 +210,7 @@ function get_stats(name) {
 
 
 function calc_stat(species, pstat, stativ, statev = 0, pokelvl, nature) { //Calculates Pokemon stats
-    let basestat = get_form_stats(species)[pstat];
+    let basestat = get_stats(species)[pstat];
     let bonus = natures[nature][(pstat - 1)];
     statev = 0;
     let result;
@@ -237,7 +237,7 @@ function calc_stativ(species, pstat, stat, statev, pokelvl, nature, chara) {
             ivs[pstat].unshift(i);
         }
     }
-    if (pstat === 0 && species === 292) {
+    if (pstat === 0 && name2dex[species] == 292) {
         ivs[pstat] = ivr.slice();
     } //Shedinja Case
 
@@ -266,8 +266,8 @@ function calc_ivs(species, lvl, stats, nature, chara) { //Calculates a complete 
     function validate_iv(result, species, pstat, stat, statev, pokelvl, nature) { // IV error handling
         let spname = species;
         let dexnum = name2dex[species];
-        let max = calc_stat(dexnum, pstat, 31, statev, pokelvl, nature);
-        let min = calc_stat(dexnum, pstat, 0, statev, pokelvl, nature);
+        let max = calc_stat(species, pstat, 31, statev, pokelvl, nature);
+        let min = calc_stat(species, pstat, 0, statev, pokelvl, nature);
         if (stat > max || stat < min) {
             alert(spname + ' at lvl ' + pokelvl + ' should have a ' + statnames[pstat] + '(' + stat + ') of ' + min + ' to ' + max + '.');
             ivs[pstat] = [-1];
@@ -283,6 +283,7 @@ function calc_ivs(species, lvl, stats, nature, chara) { //Calculates a complete 
         }
         if (result.length === 0 || result[0] > maxiv || result[0] === -1 || result[result.length] > 31) { //out of any bounds
             alert('Something is wrong with ' + spname + '\'s ' + statnames[pstat] + ' stat.');
+            console.log(result)
             ivs[pstat] = [-1];
             return ['error'];
         }
@@ -293,7 +294,7 @@ function calc_ivs(species, lvl, stats, nature, chara) { //Calculates a complete 
     ivs = [ivr.slice(), ivr.slice(), ivr.slice(), ivr.slice(), ivr.slice(), ivr.slice()];
     //Calculate row(s)
     for (let j = 5; j >= 0; j--) {
-        ivs[j] = array_intersect(ivs[j], calc_stativ(name2dex[species], j, stats[j], 0, lvl, nature_dict.indexOf(nature), chara));
+        ivs[j] = array_intersect(ivs[j], calc_stativ(species, j, stats[j], 0, lvl, nature_dict.indexOf(nature), chara));
     }
     miniv[0] = (chara).split('.')[0];
     //Validate IVs

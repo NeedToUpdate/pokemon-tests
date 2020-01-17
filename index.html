@@ -180,9 +180,11 @@
         //let abil = id('stat-abil').value;
         let nature = id('stat-nature').value;
         console.log(stats,name,lvl,nature);
-        id('ivs-result').innerText = calc_ivs(name, lvl, stats, nature, '-1').map(x => x[0]);
+        id('ivs-result').innerText = calc_ivs(name, lvl, stats, nature, '-1');
     })
 
+
+console.log()
 
 </script>
 </body>
