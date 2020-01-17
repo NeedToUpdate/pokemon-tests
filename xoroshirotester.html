@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shiny Den Helper</title>
+    <script language="javascript" src="./ivcalc.js"></script>
+    <script language="javascript" src="./xoroshiro.js"></script>
+    <script language="javascript" src="./auto-complete.js"></script>
+    <link rel="stylesheet" href="./css/auto-complete.css">
+    <style>
+        .ivinput{
+            width: 50px;
+        }
+    </style>
+</head>
+<body>
+<form onsubmit="return false;" class="pure-form" style="display: inline-grid">
+    <label for="stat-name">Name:</label>
+    <input id="stat-name" autofocus type="text" name="stat-name" placeholder="Pokemon Species">
+    <label for="stat-lvl">Level:</label>
+    <input class="ivinput" id="stat-lvl" type="number" name="level" placeholder="Level" value="100">
+    <label for="stat-nature">Nature:</label>
+    <input id="stat-nature" autofocus type="text" name="stat-nature" placeholder="Nature">
+    <label for="stat-ivs">Stats:</label>
+    <input class="input" id="stat-ivs" type="text" placeholder="stats in order with spaces in between">
+    <label for="stat-chara">Characteristic:</label>
+    <input class="input" id="stat-chara" type="text">
+    <label for="stat-abil">Ability:</label>
+    <input class="input" id="stat-abil" type="text">
+</form>
+<button id="calcivs">Calculate</button>
+
+
+<p id="ivs-result"></p>
+<br>
+
+<input style="margin-top: 30px" id="xorotest" type="text">
+<button id="xorotestbtn">test xoro</button>
+<p> Next value is: <span id="xorotestout"></span></p>
+<br>
+<br>
+<input id="seedinput" value="0xafdc1fdd61f628b5" type="text" style="margin-top: 30px">
+<input id="shinycheck" type="checkbox">only shiny?
+<button id="search">gen seed</button>
+<table id="resultstable">
+    <tr>
+        <th>Frame</th>
+        <th>IVs</th>
+        <th>Shiny?</th>
+        <th>Nature</th>
+        <th>Ability</th>
+        <th>Gender</th>
+    </tr>
+</table>
+
+<script type="text/javascript">
+    let name_auto = new autoComplete({
+        selector: '#stat-name',
+        minChars: 1,
+        source: function(term, suggest){
+            term = term.toLowerCase();
+            let choices = Object.keys(name2dex)
+            let suggestions = [];
+            for (let i=0;i<choices.length;i++)
+                if (~choices[i].toLowerCase().indexOf(term)) suggestions.push(choices[i]);
+            suggest(suggestions);
+        }
+    });
+    let nature_auto =  new autoComplete({
+        selector: '#stat-nature',
+        minChars: 1,
+        source: function(term, suggest){
+            term = term.toLowerCase();
+            let choices = nature_dict
+            let suggestions = [];
+            for (let i=0;i<choices.length;i++)
+                if (~choices[i].toLowerCase().indexOf(term)) suggestions.push(choices[i]);
+            suggest(suggestions);
+        }
+    });
+    let chara_auto =  new autoComplete({
+        selector: '#stat-chara',
+        minChars: 1,
+        source: function(term, suggest){
+            term = term.toLowerCase();
+            let choices = characteristics.map(x=>x[1]);
+            let suggestions = [];
+            for (let i=0;i<choices.length;i++)
+                if (~choices[i].toLowerCase().indexOf(term)) suggestions.push(choices[i]);
+            suggest(suggestions);
+        }
+    });
+    function id(id){
+        return document.getElementById(id);
+    }
+
+
+    let xoro = new Xoroshiro(0x82a2b175229d6a5bn);
+    let btn = document.getElementById("xorotestbtn");
+    let input = document.getElementById("xorotest");
+    let output = document.getElementById("xorotestout");
+    btn.addEventListener("click", () => {
+        let num = input.value;
+        if (num) {
+            let string = "";
+            for (let i = 0; i < 10; i++) {
+                string += xoro.next(num) + ", "
+            }
+            output.innerText = string
+        }
+    });
+
+
+    function newcol(text) {
+        let col = document.createElement("th");
+        let tn = document.createTextNode(text);
+        col.append(tn);
+        return col
+    }
+
+    let genbtn = document.getElementById("search");
+
+    genbtn.addEventListener("click", () => {
+        let shiny = document.getElementById("shinycheck").checked;
+        let seed = document.getElementById("seedinput").value;
+        if(seed[1] !== 'x'){
+            seed = '0x'+seed;
+        }
+        seed = BigInt(seed);
+        console.log(seed);
+        let listgen = new ListGen(seed, shiny ? 10000 : 10, 4, shiny);
+        let list = listgen.generate();
+      //  console.log(JSON.stringify(list));
+        let table = document.getElementById("resultstable");
+        list.forEach(item => {
+            let row = document.createElement("tr");
+            Object.keys(item).forEach(key => {
+                if (key !== "nature") {
+                    row.append(newcol(item[key]))
+                } else {
+                    row.append(newcol(nature_dict[item[key]]))
+                }
+            });
+            table.append(row)
+        });
+        genbtn.innerText = "done"
+    });
+
+    let calcbtn = id('calcivs');
+    calcbtn.addEventListener('click',()=>{
+        let stats = id('stat-ivs').value.split(' ').map(x=>parseInt(x));
+        let name = id('stat-name').value;
+        let lvl = id('stat-lvl').value;
+        let chara = id('stat-chara').value;
+        let abil = id('stat-abil').value;
+        let nature = id('stat-nature').value;
+        console.log(stats,name,lvl,chara,abil,nature)
+        let ivs = calc_ivs(name,lvl,stats,nature,'-1');
+        id('ivs-result').innerText = ivs;
+    });
+
+
+
+</script>
+</body>
+</html>
