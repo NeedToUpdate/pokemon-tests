@@ -5,6 +5,7 @@
     <script language="javascript" src="./ivcalc.js"></script>
     <script language="javascript" src="./xoroshiro.js"></script>
     <script language="javascript" src="./auto-complete.js"></script>
+    <script language="javascript" src="./ivseedcheck.js"></script>
     <link rel="stylesheet" href="./css/auto-complete.css">
     <style>
         .ivinput{
@@ -22,15 +23,16 @@
     <input id="stat-nature" autofocus type="text" name="stat-nature" placeholder="Nature">
     <label for="stat-ivs">Stats:</label>
     <input class="input" id="stat-ivs" type="text" placeholder="stats in order with spaces in between">
-    <label for="stat-chara">Characteristic:</label>
+   <!-- <label for="stat-chara">Characteristic:</label>
     <input class="input" id="stat-chara" type="text">
     <label for="stat-abil">Ability:</label>
-    <input class="input" id="stat-abil" type="text">
+    <input class="input" id="stat-abil" type="text">-->
 </form>
 <button id="calcivs">Calculate</button>
 
 
 <p id="ivs-result"></p>
+<p id="seed-result"></p>
 <br>
 
 <input style="margin-top: 30px" id="xorotest" type="text">
@@ -58,7 +60,7 @@
         minChars: 1,
         source: function(term, suggest){
             term = term.toLowerCase();
-            let choices = Object.keys(name2dex)
+            let choices = Object.keys(name2dex);
             let suggestions = [];
             for (let i=0;i<choices.length;i++)
                 if (~choices[i].toLowerCase().indexOf(term)) suggestions.push(choices[i]);
@@ -70,7 +72,7 @@
         minChars: 1,
         source: function(term, suggest){
             term = term.toLowerCase();
-            let choices = nature_dict
+            let choices = nature_dict;
             let suggestions = [];
             for (let i=0;i<choices.length;i++)
                 if (~choices[i].toLowerCase().indexOf(term)) suggestions.push(choices[i]);
@@ -150,12 +152,17 @@
         let stats = id('stat-ivs').value.split(' ').map(x=>parseInt(x));
         let name = id('stat-name').value;
         let lvl = id('stat-lvl').value;
-        let chara = id('stat-chara').value;
-        let abil = id('stat-abil').value;
+        //let chara = id('stat-chara').value;
+        //let abil = id('stat-abil').value;
         let nature = id('stat-nature').value;
-        console.log(stats,name,lvl,chara,abil,nature)
-        let ivs = calc_ivs(name,lvl,stats,nature,'-1');
+        console.log(stats,name,lvl,nature);
+        let ivs = calc_ivs(name,lvl,stats,nature,'-1').map(x=>x[0]);
         id('ivs-result').innerText = ivs;
+        console.log(ivs)
+        id('seed-result').innerText = checkIvs(ivs)[0]
+
+
+
     });
 
 
