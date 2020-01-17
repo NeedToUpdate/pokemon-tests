@@ -27,9 +27,13 @@
     <input class="input" id="stat-chara" type="text">
     <label for="stat-abil">Ability:</label>
     <input class="input" id="stat-abil" type="text">-->
-</form>
-<button id="calcivs">Calculate</button>
+    <div>
 
+        <button id="calcivs">Calculate</button>
+        <button id="calcjustivs">Only Ivs</button>
+
+    </div>
+</form>
 
 <p id="ivs-result"></p>
 <p id="seed-result"></p>
@@ -158,13 +162,26 @@
         console.log(stats,name,lvl,nature);
         let ivs = calc_ivs(name,lvl,stats,nature,'-1').map(x=>x[0]);
         id('ivs-result').innerText = ivs;
-        console.log(ivs)
-        id('seed-result').innerText = checkIvs(ivs)[0]
+        console.log(ivs);
+        let res = checkIvs(ivs);
+        id('seed-result').innerText = res[0];
+        id('seed-result').style.color = res[1];
+
 
 
 
     });
 
+    id('calcjustivs').addEventListener('click',()=>{
+        let stats = id('stat-ivs').value.split(' ').map(x=>parseInt(x));
+        let name = id('stat-name').value;
+        let lvl = id('stat-lvl').value;
+        //let chara = id('stat-chara').value;
+        //let abil = id('stat-abil').value;
+        let nature = id('stat-nature').value;
+        console.log(stats,name,lvl,nature);
+        id('ivs-result').innerText = calc_ivs(name, lvl, stats, nature, '-1').map(x => x[0]);
+    })
 
 
 </script>
