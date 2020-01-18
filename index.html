@@ -11,26 +11,42 @@
         .ivinput{
             width: 50px;
         }
+        .input{
+            height: 30px;
+            width: 200px;
+            font-size:1.1em;
+            margin: 5px;
+        }
+        .buttons{
+            height: 40px;
+            width: 80px;
+            border-radius:5px;
+            color: white;
+            background-color: teal;
+            border: solid lightblue 3px;
+            margin: 4px;
+            font-size: 1.1em
+        }
     </style>
 </head>
 <body>
 <form onsubmit="return false;" class="pure-form" style="display: inline-grid">
     <label for="stat-name">Name:</label>
-    <input id="stat-name" autofocus type="text" name="stat-name" placeholder="Pokemon Species">
+    <input class="input" id="stat-name" autofocus type="text" name="stat-name" placeholder="Pokemon Species">
     <label for="stat-lvl">Level:</label>
-    <input class="ivinput" id="stat-lvl" type="number" name="level" placeholder="Level" value="100">
+    <input class="input" id="stat-lvl" type="number" name="level" placeholder="Level" value="100">
     <label for="stat-nature">Nature:</label>
-    <input id="stat-nature" autofocus type="text" name="stat-nature" placeholder="Nature">
+    <input class="input" id="stat-nature" autofocus type="text" name="stat-nature" placeholder="Nature">
     <label for="stat-ivs">Stats:</label>
-    <input class="input" id="stat-ivs" type="text" placeholder="stats in order with spaces in between">
+    <input class="ivinput input" id="stat-ivs" type="text" placeholder="stats in order with spaces in between">
    <!-- <label for="stat-chara">Characteristic:</label>
     <input class="input" id="stat-chara" type="text">
     <label for="stat-abil">Ability:</label>
     <input class="input" id="stat-abil" type="text">-->
     <div>
 
-        <button id="calcivs">Calculate</button>
-        <button id="calcjustivs">Only Ivs</button>
+        <button class="buttons" id="calcivs">Calculate</button>
+        <button class="buttons" id="calcjustivs">Only Ivs</button>
 
     </div>
 </form>
@@ -44,7 +60,7 @@
 <p> Next value is: <span id="xorotestout"></span></p>
 <br>
 <br>
-<input id="seedinput" value="0xafdc1fdd61f628b5" type="text" style="margin-top: 30px">
+<input id="seedinput" value="0xba135fd73fdc5375" type="text" style="margin-top: 30px">
 <input id="shinycheck" type="checkbox">only shiny?
 <button id="search">gen seed</button>
 <table id="resultstable">
@@ -180,7 +196,13 @@
         //let abil = id('stat-abil').value;
         let nature = id('stat-nature').value;
         console.log(stats,name,lvl,nature);
-        id('ivs-result').innerText = calc_ivs(name, lvl, stats, nature, '-1');
+        id('ivs-result').innerText = calc_ivs(name, lvl, stats, nature, '-1').map(x=>{
+            if(x.length>1){
+                return x[0] + '-' + x[x.length-1]
+            }else{
+             return x[0]
+            }
+        });
     })
 
 
