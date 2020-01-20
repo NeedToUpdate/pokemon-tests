@@ -337,7 +337,7 @@ function InitializeTransformationMatrix(isEnableECbit)
     // c_N^1���Z�b�g
     for(let  i = 0; i < 256; ++i)
     {
-        g_TempMatrix[i] = Const::c_N[i];
+        g_TempMatrix[i] = constants[i];
     }
 
 }
@@ -362,24 +362,24 @@ function ProceedTransformationMatrix()
             let t1 = 0;
             for(let  i = 0; i < 64; ++i)
             {
-                if((Const::c_N[y * 2] & (1ull << (63 - i))) != 0
-            && (l_Temp[i * 2] & (1ull << (63 - x))) != 0)
+                if((constants[y * 2] & (1n << (63 - i))) !== 0
+            && (l_Temp[i * 2] & (1n << (63 - x))) !== 0)
                 {
                     t0 = 1 - t0;
                 }
-                if((Const::c_N[y * 2 + 1] & (1ull << (63 - i))) != 0
-            && (l_Temp[(i + 64) * 2] & (1ull << (63 - x))) != 0)
+                if((constants[y * 2 + 1] & (1n << (63 - i))) !== 0
+            && (l_Temp[(i + 64) * 2] & (1n << (63 - x))) !== 0)
                 {
                     t0 = 1 - t0;
                 }
 
-                if((Const::c_N[y * 2] & (1ull << (63 - i))) != 0
-            && (l_Temp[i * 2 + 1] & (1ull << (63 - x))) != 0)
+                if((constants[y * 2] & (1n << (63 - i))) !== 0
+            && (l_Temp[i * 2 + 1] & (1n << (63 - x))) !== 0)
                 {
                     t1 = 1 - t1;
                 }
-                if((Const::c_N[y * 2 + 1] & (1ull << (63 - i))) != 0
-            && (l_Temp[(i + 64) * 2 + 1] & (1ull << (63 - x))) != 0)
+                if((constants[y * 2 + 1] & (1n << (63 - i))) !== 0
+            && (l_Temp[(i + 64) * 2 + 1] & (1n << (63 - x))) !== 0)
                 {
                     t1 = 1 - t1;
                 }
@@ -406,7 +406,7 @@ function CalculateInverseMatrix(let  length)
     // ������Ԃ��Z�b�g
     for (let  i = 0; i < length; ++i)
     {
-        g_AnswerFlag[i] = (1ull << (length - 1 - i));
+        g_AnswerFlag[i] = (1n << (length - 1 - i));
     }
 
     let  skip = 0;
@@ -418,18 +418,18 @@ function CalculateInverseMatrix(let  length)
     // �s��{�ό`�ŋ��߂�
     for (let  rank = 0; rank < length; )
     {
-        let top = (1ull << (63 - (rank + skip)));
+        let top = (1n << (63 - (rank + skip)));
         bool rankUpFlag = false;
         for (let  i = rank; i < length; ++i)
         {
-            if ((g_InputMatrix[i] & top) != 0) // ��ԍ���1
+            if ((g_InputMatrix[i] & top) !== 0) // ��ԍ���1
             {
                 for (let  a = 0; a < length; ++a)
                 {
                     if (a == i) continue;
 
                     // �������1������
-                    if ((g_InputMatrix[a] & top) != 0)
+                    if ((g_InputMatrix[a] & top) !== 0)
                     {
                         g_InputMatrix[a] ^= g_InputMatrix[i];
                         g_AnswerFlag[a] ^= g_AnswerFlag[i];
@@ -468,7 +468,7 @@ function CalculateInverseMatrix(let  length)
         g_Coefficient[i] = 0;
         for (let  a = 0; a < (64 - length); ++a)
         {
-            g_Coefficient[i] |= (g_InputMatrix[i] & (1ull << (63 - g_FreeId[a]))) >> ((length + a) - g_FreeId[a]);
+            g_Coefficient[i] |= (g_InputMatrix[i] & (1n << (63 - g_FreeId[a]))) >> ((length + a) - g_FreeId[a]);
         }
     }
 }
@@ -492,7 +492,7 @@ function CalculateCoefficientData(let  length)
         }
         for (let  a = 0; a < (64 - length); ++a)
         {
-            g_SearchPattern[search] |= ((let)search & (1ull << (64 - length - 1 - a))) << ((length + a) - g_FreeId[a]);
+            g_SearchPattern[search] |= ((let)search & (1n << (64 - length - 1 - a))) << ((length + a) - g_FreeId[a]);
         }
     }
 }
