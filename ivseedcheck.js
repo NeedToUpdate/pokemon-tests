@@ -69,24 +69,8 @@ function checkIvs(inputivs) {
     if(ivtype===3){
         is3iv = true;
     }
-    let strict = ivtype;
+
     let c = 0;
-    for (let i = 0; i < 6; i++) {
-        if (ivs[i] === 31) {
-            c++;
-        }
-    }
-    if (c !== strict) {
-        // エラー
-        if (strict === 3) {
-            alert('must be 3iv');
-            return;
-        }
-        else {
-            alert('must be 2iv');
-            return;
-        }
-    }
 
     // 遺伝箇所チェック
     let possible = [false, false, false, false, false];
@@ -98,10 +82,12 @@ function checkIvs(inputivs) {
             fixedCount++;
         }
     }
-
+    console.log(Array.from(vFlag), fixedCount);
     // 2V+3Vor4Vで6個確定
     // 3V+4Vで5個確定
-    let needNumber = (!is3iv/* im assuming this means 2iv panel Get35Mode() === Star35PanelMode.From2V*/ ? 6 : 5);
+    let needNumber = (!is3iv ? 6 : 5);
+
+    //if 2 iv, need 6 else 5;
 
     for (let vCount = fixedCount + 1; vCount <= 4; vCount++) {
         c = fixedCount;
@@ -109,15 +95,18 @@ function checkIvs(inputivs) {
         for (let i = 0; i < 6; i++) {
             vFlag[i] = (ivs[i] === 31);
         }
+        //console.log(Array.from(vFlag))
         // 普通に個体値生成をやってみる
         for (let i = 0; i < 6; i++) {
             if (ivs[i] !== 31) {
                 used++;
                 let vPos = ivs[i] % 8;
+                //console.log(vPos);
                 if (vPos < 6 && vFlag[vPos] === false) {
                     vFlag[vPos] = true;
                     c++;
                     if (c === vCount) // 遺伝終わり
+                        //console.log(vCount)
                     {
                         // 未知の部分が連続してneedNumber以上
                         if ((6 - vCount) - (6 - used) + (6 - fixedCount) >= needNumber) {
