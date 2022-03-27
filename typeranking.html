@@ -85,7 +85,7 @@
                                 })">
             <div class="text-with-number"
                 v-if="items !== 'does_damage_to' && items !== 'takes_damage_from'">
-                <p class="title">{{items.split('_').join(' ')}}: <span class="emphasis">{{data[key][type2][items]}}</span></p>
+                <p class="title">{{items.split('_').join(' ')}}: {{items=='defensive_total'?'(bigger is worse) ':''}}{{items=='offensive_total'?'(bigger is better) ':''}}<span class="emphasis">{{data[key][type2][items]}}</span></p>
             </div>
 
             <div class="special-case"
