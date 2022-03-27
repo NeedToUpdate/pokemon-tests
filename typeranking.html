@@ -43,18 +43,32 @@
         async mounted() {
             this.data = await this.getData('./all_types.json')
         },
-        currentMode: 'ONLY DUAL TYPINGS',
-        async switchMode(){
-            if(this.currentMode === 'ONLY DUAL TYPINGS'){
-                this.currentMode = 'loading...'
-                this.data = await this.getData('./all_types_with_singles.json')
-                this.currentMode = 'DUAL AND SINGLE TYPINGS'
-            }else{
-                
-                this.currentMode = 'loading...'
-                this.data = await this.getData('./all_types.json')
-                this.currentMode = 'ONLY DUAL TYPINGS'
+        currentMode(){
+            switch(this.mode){
+                case 0:
+                    return 'ONLY DUAL TYPINGS'
+                case 1:
+                    return 'DUAL AND SINGLE TYPINGS'
+                case 2:
+                    return 'DUAL TYPINGS BUT 4x IS HEAVILY WEIGHTED'
             }
+        },
+        mode: 0,
+        async switchMode(){
+           this.mode = (this.mode+1)%3
+           this.loading = true;
+           switch(this.mode){
+               case 0:
+                this.data = await this.getData('./all_types.json')
+                break
+                case 1:
+                this.data = await this.getData('./all_types_with_singles.json')
+                break
+                case 2:
+                this.data = await this.getData('./all_types_squared.json')
+                break
+           }
+           this.loading = false
         },
         DualType
     }).mount();
@@ -230,7 +244,7 @@
         </div>
         <div v-if="!loading"
             class="type-icon big"
-            @click="switchMode">SHOWING {{currentMode}}</div>
+            @click="switchMode">SHOWING {{currentMode()}}</div>
     </div>
 </body>
 <style>

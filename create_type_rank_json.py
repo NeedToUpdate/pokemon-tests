@@ -76,26 +76,26 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False):
                     if not (t3,t4) in all_stats[name]['types_done']:
                         all_stats[name]['types_done'].append((t3,t4))
                     t1dmg = damageFrom(t1, [t3,t4] if t4!= 'none' else t3)
-                    all_stats[name]["offensive_total"] += t1dmg
+                    all_stats[name]["offensive_total"] += t1dmg**2
                     if t3 not in all_stats[name]["does_damage_to"]:
                         all_stats[name]["does_damage_to"][t3] = {}
                     all_stats[name]["does_damage_to"][t3][t4] = {t1: t1dmg}
                     if t2 != 'none':
                         t2dmg = damageFrom(t2, [t3,t4] if t4!= 'none' else t3)
                         all_stats[name]["does_damage_to"][t3][t4] = {t1: t1dmg, t2:t2dmg, 'sum':t1dmg+t2dmg, 'product': t1dmg*t2dmg }
-                        all_stats[name]["offensive_total"] += t2dmg
+                        all_stats[name]["offensive_total"] += t2dmg**2
                         if t4 not in all_stats[name]["does_damage_to"]:
                             all_stats[name]["does_damage_to"][t4] = {}
                         all_stats[name]["does_damage_to"][t4][t3] = {t1: t1dmg, t2:t2dmg, 'sum':t1dmg+t2dmg, 'product': t1dmg*t2dmg }
                     t3def = damageFrom(t3, [t1,t2] if t2!= 'none' else t1)
-                    all_stats[name]["defensive_total"] += t3def
+                    all_stats[name]["defensive_total"] += t3def**2 if t3def!= 0 else -2
                     if t3 not in all_stats[name]["takes_damage_from"]:
                         all_stats[name]["takes_damage_from"][t3] = {}
                     all_stats[name]["takes_damage_from"][t3][t4] = {t3: t3def}
                     if t4 != 'none':
                         t4def = damageFrom(t4, [t1,t2] if t2!= 'none' else t1)
                         all_stats[name]["takes_damage_from"][t3][t4] = {t3: t3def, t4:t4def, 'sum':t3def+t4def, 'product': t3def*t4def }
-                        all_stats[name]["defensive_total"] += t4def
+                        all_stats[name]["defensive_total"] += t4def**2 if t4def!= 0 else -2
                         if t4 not in all_stats[name]["takes_damage_from"]:
                             all_stats[name]["takes_damage_from"][t4] = {}
                         all_stats[name]["takes_damage_from"][t4][t3] = {t3: t3def, t4:t4def, 'sum':t3def+t4def, 'product': t3def*t4def }
@@ -170,7 +170,7 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False):
     return final_json
 
 def save_json(final_json):
-    with open('./all_types.json','w') as f:
+    with open('./all_types_squared.json','w') as f:
         f.write(json.dumps(final_json))
 
 save_json(create_type_rank_dict(False))
