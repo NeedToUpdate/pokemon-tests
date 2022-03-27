@@ -31,13 +31,15 @@
     }
     createApp({
         async getData(name){
+            this.loading = true;
             let res = await fetch(name)
             let json = await res.json()
-            console.log(json)
+            this.loading = false
             return json
         },
         data: {},
         clicked:{},
+        loading: true,
         async mounted() {
             this.data = await this.getData('./all_types.json')
         },
@@ -191,6 +193,9 @@
     <div class="all-data"
         v-scope
         @vue:mounted="mounted">
+
+        <h4 class="loading"
+            v-if="loading">loading....</h4>
         <div class="type"
             v-for="key in Object.keys(data).sort((a,b)=>{
                     if((a  == 'offensive_ranks' || a  == 'defensive_ranks'  || a =='total_ranks')){
@@ -223,7 +228,8 @@
             </div>
 
         </div>
-        <div class="type-icon big"
+        <div v-if="!loading"
+            class="type-icon big"
             @click="switchMode">SHOWING {{currentMode}}</div>
     </div>
 </body>
