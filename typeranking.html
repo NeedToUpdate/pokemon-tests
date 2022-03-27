@@ -30,8 +30,8 @@
         }
     }
     createApp({
-        async getData(){
-            let res = await fetch('./all_types.json')
+        async getData(name){
+            let res = await fetch(name)
             let json = await res.json()
             console.log(json)
             return json
@@ -39,7 +39,17 @@
         data: {},
         clicked:{},
         async mounted() {
-            this.data = await this.getData()
+            this.data = await this.getData('./all_types.json')
+        },
+        currentMode: 'ONLY DUAL TYPINGS',
+        async switchMode(){
+            if(this.currentMode === 'ONLY DUAL TYPINGS'){
+                this.data = await this.getData('./all_types_with_singles.json')
+                this.currentMode = 'DUAL AND SINGLE TYPINGS'
+            }else{
+                this.data = await this.getData('./all_types.json')
+                this.currentMode = 'ONLY DUAL TYPINGS'
+            }
         },
         DualType
     }).mount();
@@ -175,43 +185,43 @@
 </template>
 
 <body>
-    <div>
-        <div class="all-data"
-            v-scope
-            @vue:mounted="mounted">
-            <div class="type"
-                v-for="key in Object.keys(data).sort((a,b)=>{
+    <div class="all-data"
+        v-scope
+        @vue:mounted="mounted">
+        <div class="type"
+            v-for="key in Object.keys(data).sort((a,b)=>{
                     if((a  == 'offensive_ranks' || a  == 'defensive_ranks'  || a =='total_ranks')){
                         return -1
                     }
                     return 1
                 })"
-                :key="key">
-                <div class="type-icon margin"
-                    @click="clicked[key] = !clicked[key]"
-                    :class="key">
-                    <p class="type-text">{{key.split('_').join(' ')}}</p>
-                </div>
-                <div class="special-rank-case"
-                    v-if="clicked[key] && (key  == 'offensive_ranks' || key  == 'defensive_ranks'  || key =='total_ranks')">
-                    <div class="beeg-box"
-                        v-for="name,i in data[key]">
-                        <p class="emphasis">#{{parseInt(i)+1}}</p>
-
-                        <div class="recursive-dual-type"
-                            v-scope="DualType({key:name.split(',')[0],  type2:name.split(',')[1], data:data, level:'1'})"></div>
-                    </div>
-                </div>
-                <div class="second-list"
-                    v-if="clicked[key] && key !== 'offensive_ranks' && key !== 'defensive_ranks'  && key!=='total_ranks'">
-                    <div class="combo-with-data"
-                        v-for="type2 in Object.keys(data[key])">
-                        <div v-scope="DualType({key:key,type2:type2,data:data,level:'0'})"></div>
-                    </div>
-                </div>
-
+            :key="key">
+            <div class="type-icon margin big"
+                @click="clicked[key] = !clicked[key]"
+                :class="key">
+                <p class="type-text">{{key.split('_').join(' ')}}</p>
             </div>
+            <div class="special-rank-case"
+                v-if="clicked[key] && (key  == 'offensive_ranks' || key  == 'defensive_ranks'  || key =='total_ranks')">
+                <div class="beeg-box"
+                    v-for="name,i in data[key]">
+                    <p class="emphasis">#{{parseInt(i)+1}}</p>
+
+                    <div class="recursive-dual-type"
+                        v-scope="DualType({key:name.split(',')[0],  type2:name.split(',')[1], data:data, level:'1'})"></div>
+                </div>
+            </div>
+            <div class="second-list"
+                v-if="clicked[key] && key !== 'offensive_ranks' && key !== 'defensive_ranks'  && key!=='total_ranks'">
+                <div class="combo-with-data"
+                    v-for="type2 in Object.keys(data[key])">
+                    <div v-scope="DualType({key:key,type2:type2,data:data,level:'0'})"></div>
+                </div>
+            </div>
+
         </div>
+        <div class="type-icon big"
+            @click="switchMode">SHOWING {{currentMode}}</div>
     </div>
 </body>
 <style>
