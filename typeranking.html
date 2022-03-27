@@ -44,9 +44,12 @@
         currentMode: 'ONLY DUAL TYPINGS',
         async switchMode(){
             if(this.currentMode === 'ONLY DUAL TYPINGS'){
+                this.currentMode = 'loading...'
                 this.data = await this.getData('./all_types_with_singles.json')
                 this.currentMode = 'DUAL AND SINGLE TYPINGS'
             }else{
+                
+                this.currentMode = 'loading...'
                 this.data = await this.getData('./all_types.json')
                 this.currentMode = 'ONLY DUAL TYPINGS'
             }
