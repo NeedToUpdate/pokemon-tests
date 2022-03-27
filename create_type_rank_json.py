@@ -170,7 +170,7 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False):
     return final_json
 
 def save_json(final_json):
-    with open('./all_types_with_singles.json','w') as f:
+    with open('./all_types.json','w') as f:
         f.write(json.dumps(final_json))
 
-save_json(create_type_rank_dict(True))
+save_json(create_type_rank_dict(False))
