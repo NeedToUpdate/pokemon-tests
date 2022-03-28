@@ -272,7 +272,7 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
             # if INCLUDE_PREVALENCE:
             #     all_stats[key][dmg_mult] = str(round( all_stats[key][dmg_mult],2)) + '%'
             # else:
-            all_stats[key][dmg_mult] = str(all_stats[key][dmg_mult]) + 'times'
+            all_stats[key][dmg_mult] = str(all_stats[key][dmg_mult]) + ' times'
 
 
     worst_off_score = min([score for (name, score) in [(name,stats['offensive_total']) for (name, stats) in all_stats.items()]])
