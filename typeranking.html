@@ -273,14 +273,15 @@
                     type="checkbox"
                     name='include_ability'
                     class="checkbox">
-                <label for="include_ability">Give a bonus for inherent type abilities, like dark resisting prankster or water getting a boost in rain</label>
+                <label for="include_ability">Give a small bonus for inherent type abilities, like dark resisting prankster or water getting a boost in rain</label>
             </div>
             <div class="check-group">
                 <input v-model="prevalence"
                     type="checkbox"
                     name='prevalence'
                     class="checkbox">
-                <label for="prevalence">Adjust for prevalence (all pokemon) i.e if you do damage to a prevalent type, more points, if you resist a prevalent type, more points</label>
+                <label for="prevalence">Adjust for prevalence (all pokemon) i.e if you do damage to a prevalent type, more points, if you resist a prevalent type, more points. Individual stats will also show what % of all pokemon the type
+                    can hit</label>
             </div>
             <div class="check-group">
                 <input v-model="only_best_move"
