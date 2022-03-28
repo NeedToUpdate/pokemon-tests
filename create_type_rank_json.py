@@ -91,6 +91,12 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                             "types_done": [],
                             "does_damage_to": {},
                             "takes_damage_from": {},
+                            "does_4x":0,
+                            "does_2x":0,
+                            "does_neutral":0,
+                            "does_0.5x":0,
+                            "does_0.25x":0,
+                            "does_0":0,
                         }
                     if (t4,t3) in all_stats[name]['types_done'] or (t3,t4) in all_stats[name]['types_done']:
                         continue
@@ -107,6 +113,21 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                     #offensive
                     
                     t1dmg = damageFrom(t1, [t3,t4] if t4!= 'none' else t3)
+
+                    def recordDmg(dmg):
+                        if dmg == 4:
+                            all_stats[name]['does_4x'] += 1
+                        if dmg == 2:
+                            all_stats[name]["does_2x"] += 1
+                        if dmg == 1:
+                            all_stats[name]["does_neutral"] += 1
+                        if dmg == 0.5:
+                            all_stats[name]["does_0.5x"] += 1
+                        if dmg == 0.25:
+                            all_stats[name]["does_0.25x"] += 1
+                        if dmg == 0:
+                            all_stats[name]["does_0"] += 1
+                    recordDmg(t1dmg)
 
                     def applyFiltersOff(input):
                         num = input
@@ -130,28 +151,29 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                             return str(t1) + ' (not used)'
                         else:
                             return str(t1) + ' (equal)'
-                            
+                    
 
                     if t3 not in all_stats[name]["does_damage_to"]:
                         all_stats[name]["does_damage_to"][t3] = {}
                     all_stats[name]["does_damage_to"][t3][t4] = {t1: t1dmg}
                     
                     
-                    t1dmg = applyFiltersOff(t1dmg)
+                    t1dmg_filt = applyFiltersOff(t1dmg)
 
 
                     if t2 != 'none':
                         t2dmg = damageFrom(t2, [t3,t4] if t4!= 'none' else t3)
+                        recordDmg(t2dmg)
                         all_stats[name]["does_damage_to"][t3][t4] = {t1: bestHitExplained(t1dmg,t2dmg,ONLY_USE_BEST_MOVE), t2:bestHitExplained(t2dmg,t1dmg,ONLY_USE_BEST_MOVE) }
                         if t4 not in all_stats[name]["does_damage_to"]:
                             all_stats[name]["does_damage_to"][t4] = {}
                         all_stats[name]["does_damage_to"][t4][t3] = {t1: bestHitExplained(t1dmg,t2dmg,ONLY_USE_BEST_MOVE), t2:bestHitExplained(t2dmg,t1dmg,ONLY_USE_BEST_MOVE) }
                         t2dmg = applyFiltersOff(t2dmg)
                         if ONLY_USE_BEST_MOVE:
-                            t2dmg = max(t1dmg,t2dmg)
-                            t1dmg = 0
+                            t2dmg = max(t1dmg_filt,t2dmg)
+                            t1dmg_filt = 0
                         all_stats[name]["offensive_total"] += t2dmg
-                    all_stats[name]["offensive_total"] += t1dmg
+                    all_stats[name]["offensive_total"] += t1dmg_filt
                    
 
                     #defensive
@@ -186,7 +208,7 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                         if INCLUDE_PREVALENCE:
                             num*= prevalence
                         return num
-                    t3def = applyFilters(t3def)
+                    t3def_filt = applyFilters(t3def)
                     
                  
 
@@ -198,11 +220,11 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                         all_stats[name]["takes_damage_from"][t4][t3] = {t3: bestHitExplained(t3def,t4def,ONLY_USE_BEST_MOVE), t4:bestHitExplained(t4def,t3def,ONLY_USE_BEST_MOVE) }
                         t4def = applyFilters(t4def)
                         if ONLY_USE_BEST_MOVE:
-                            t4def = max(t3def,t4def)
-                            t3def = 0
+                            t4def = max(t3def_filt,t4def)
+                            t3def_filt = 0
                         all_stats[name]["defensive_total"] += t4def
 
-                    all_stats[name]["defensive_total"] += t3def
+                    all_stats[name]["defensive_total"] += t3def_filt
 
     for key in all_stats.keys():
         del all_stats[key]['types_done']
