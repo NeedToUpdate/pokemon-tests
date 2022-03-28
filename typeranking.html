@@ -43,31 +43,38 @@
         async mounted() {
             this.data = await this.getData('./all_types.json')
         },
-        currentMode(){
-            switch(this.mode){
-                case 0:
-                    return 'ONLY DUAL TYPINGS'
-                case 1:
-                    return 'DUAL AND SINGLE TYPINGS'
-                case 2:
-                    return 'DUAL TYPINGS BUT 4x IS HEAVILY WEIGHTED'
-            }
-        },
-        mode: 0,
+        with_singles: false,
+        give_4x_boost: false,
+        single_boost: false,
+        include_ability: false,
+        prevalence: false,
+        only_best_move: false,
         async switchMode(){
-           this.mode = (this.mode+1)%3
            this.loading = true;
-           switch(this.mode){
-               case 0:
-                this.data = await this.getData('./all_types.json')
-                break
-                case 1:
-                this.data = await this.getData('./all_types_with_singles.json')
-                break
-                case 2:
-                this.data = await this.getData('./all_types_squared.json')
-                break
-           }
+           this.clicked = {};
+            let title = './all_types'
+            if(this.with_singles){
+                title += '_wsing'
+            }
+            if(this.give_4x_boost){
+                title += '_4x'
+            }
+            if(this.single_boost){
+                title += '_singx2'
+            }
+            if(this.include_ability){
+                title += '_abil'
+            }
+            if(this.prevalence){
+                title += '_prev'
+            }
+            if(this.only_best_move){
+                title += '_1mov'
+            } 
+            title += '.json'
+            console.log('loading ' + title)
+        
+            this.data = await this.getData(title)
            this.loading = false
         },
         DualType
@@ -243,13 +250,64 @@
 
         </div>
         <div v-if="!loading"
-            class="type-icon big"
-            @click="switchMode">SHOWING {{currentMode()}}</div>
+            class="options-box">
+            <h5 class="title">Choose your own sorting then click button:</h5>
+            <div class="check-group">
+                <input v-model="with_singles"
+                    type="checkbox"
+                    name='with_singles'
+                    class="checkbox">
+                <label for="with_singles">Inlcude Single Typings</label>
+            </div>
+            <div class="check-group">
+                <input v-model="give_4x_boost"
+                    type="checkbox"
+                    name='give_4x_boost'
+                    class="checkbox">
+                <label for="give_4x_boost">4x attacks and imumnities have larger wieghts</label>
+            </div>
+            <div class="check-group">
+                <input v-model="single_boost"
+                    type="checkbox"
+                    name='single_boost'
+                    class="checkbox">
+                <label for="single_boost">Single Types are offensively normalized (i.e they attack twice)</label>
+            </div>
+            <div class="check-group">
+                <input v-model="include_ability"
+                    type="checkbox"
+                    name='include_ability'
+                    class="checkbox">
+                <label for="include_ability">Give a bonus for inherent type abiliies, like dark resisting prankster or water getting a boost in rain</label>
+            </div>
+            <div class="check-group">
+                <input v-model="prevalence"
+                    type="checkbox"
+                    name='prevalence'
+                    class="checkbox">
+                <label for="prevalence">Adjust for prevalence (all pokemon) i.e if you do damage to a prevalent type, more points, if you resist a prevalent type, more points</label>
+            </div>
+            <div class="check-group">
+                <input v-model="only_best_move"
+                    type="checkbox"
+                    name='only_best_move'
+                    class="checkbox">
+                <label for="only_best_move">Use only best move out of the two</label>
+            </div>
+            <button class="type-icon big"
+                @click="switchMode()">Update Rankings</button>
+        </div>
+
+    </div>
     </div>
 </body>
 <style>
     body {
         padding: 1rem 0;
+    }
+
+    .options-box {
+        margin: 1rem;
     }
 
     .beeg-box {

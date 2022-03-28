@@ -1,3 +1,4 @@
+from pickle import FALSE
 from bs4 import BeautifulSoup as soup
 import json
 
@@ -44,10 +45,30 @@ def print_type_chart():
                 string += pad(damageFrom(t3,[t1,t2] if t1 != t2 else t1))
             print(string)
 
+def getAllTypes():
+    html = soup(open('./pokmondb.html'), 'lxml')
+    all_pokemon = []
+    for el in html.find_all('tr'):
+        if(len(el.find_all('td'))!=10):
+            continue
+        mon = {}
+        all_a = el.find_all('a')
+        # mon['name'] = all_a[0].get_text()
+        # mon['types'] = list(map(lambda x:x.get_text(),all_a[1:]))
+        # mon['dex'] = int(el.td['data-sort-value'])
+        # if(mon['dex'] not in map(lambda x: x['dex'],all_pokemon)):
+        types = list(map(lambda x:x.get_text().lower(),all_a[1:]))
+        if len(types) == 1:
+            types += ['none']
+        all_pokemon.append(tuple(types))
+    return all_pokemon
+    
 
-def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False):
+
+def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, SINGLE_TYPES_HIT_TWICE = False, GIVE_BONUS_TO_ABILITIES=False, INCLUDE_PREVALENCE=False, ONLY_USE_BEST_MOVE=False):
     all_stats = {}
     types_done = []
+    every_type = getAllTypes()
     for t1 in all_types:
         for t2 in all_types:
             for t3 in all_types:
@@ -71,42 +92,119 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False):
                             "does_damage_to": {},
                             "takes_damage_from": {},
                         }
-                    if (t4,t3) in all_stats[name]['types_done']:
+                    if (t4,t3) in all_stats[name]['types_done'] or (t3,t4) in all_stats[name]['types_done']:
                         continue
                     if not (t3,t4) in all_stats[name]['types_done']:
                         all_stats[name]['types_done'].append((t3,t4))
+
+                    prevalence = 0
+                    if INCLUDE_PREVALENCE:
+                        prevalence = every_type.count((t3,t4)) + every_type.count((t4,t3))
+                        prevalence = (prevalence/len(every_type))*100
+                        self_prevalence = every_type.count((t1,t2)) + every_type.count((t2,t1))
+                        self_prevalence = (self_prevalence/len(every_type))*100
+                        all_stats[name]['prevalence'] = str(round(self_prevalence,2)) + '%'
+                    #offensive
+                    
                     t1dmg = damageFrom(t1, [t3,t4] if t4!= 'none' else t3)
-                    all_stats[name]["offensive_total"] += t1dmg**2
+
+                    def applyFiltersOff(input):
+                        num = input
+                        if MAKE_4X_IMPORANT:
+                            num = num**2
+                        if GIVE_BONUS_TO_ABILITIES:
+                            if set([t1,t2]) & set(['water','fire']):
+                                num +=0.25 
+                        if t2 == 'none' and SINGLE_TYPES_HIT_TWICE and not ONLY_USE_BEST_MOVE:
+                            num *=1.5
+                        if INCLUDE_PREVALENCE:
+                            num*= prevalence
+                        return num
+
+                    def bestHitExplained(t1,t2,use):
+                        if not use:
+                            return t1
+                        if t1 > t2:
+                            return str(t1) + ' (used)'
+                        elif t1 < t2:
+                            return str(t1) + ' (not used)'
+                        else:
+                            return str(t1) + ' (equal)'
+                            
+
                     if t3 not in all_stats[name]["does_damage_to"]:
                         all_stats[name]["does_damage_to"][t3] = {}
                     all_stats[name]["does_damage_to"][t3][t4] = {t1: t1dmg}
+                    
+                    
+                    t1dmg = applyFiltersOff(t1dmg)
+
+
                     if t2 != 'none':
                         t2dmg = damageFrom(t2, [t3,t4] if t4!= 'none' else t3)
-                        all_stats[name]["does_damage_to"][t3][t4] = {t1: t1dmg, t2:t2dmg, 'sum':t1dmg+t2dmg, 'product': t1dmg*t2dmg }
-                        all_stats[name]["offensive_total"] += t2dmg**2
+                        all_stats[name]["does_damage_to"][t3][t4] = {t1: bestHitExplained(t1dmg,t2dmg,ONLY_USE_BEST_MOVE), t2:bestHitExplained(t2dmg,t1dmg,ONLY_USE_BEST_MOVE) }
                         if t4 not in all_stats[name]["does_damage_to"]:
                             all_stats[name]["does_damage_to"][t4] = {}
-                        all_stats[name]["does_damage_to"][t4][t3] = {t1: t1dmg, t2:t2dmg, 'sum':t1dmg+t2dmg, 'product': t1dmg*t2dmg }
+                        all_stats[name]["does_damage_to"][t4][t3] = {t1: bestHitExplained(t1dmg,t2dmg,ONLY_USE_BEST_MOVE), t2:bestHitExplained(t2dmg,t1dmg,ONLY_USE_BEST_MOVE) }
+                        t2dmg = applyFiltersOff(t2dmg)
+                        if ONLY_USE_BEST_MOVE:
+                            t2dmg = max(t1dmg,t2dmg)
+                            t1dmg = 0
+                        all_stats[name]["offensive_total"] += t2dmg
+                    all_stats[name]["offensive_total"] += t1dmg
+                   
+
+                    #defensive
+
                     t3def = damageFrom(t3, [t1,t2] if t2!= 'none' else t1)
-                    all_stats[name]["defensive_total"] += t3def**2 if t3def!= 0 else -2
                     if t3 not in all_stats[name]["takes_damage_from"]:
                         all_stats[name]["takes_damage_from"][t3] = {}
                     all_stats[name]["takes_damage_from"][t3][t4] = {t3: t3def}
+                    
+                    def applyFilters(input):
+                        num = input
+                        if MAKE_4X_IMPORANT:
+                            num = num**2 if num!= 0 else -2
+                        if GIVE_BONUS_TO_ABILITIES:
+                            if 'grass' in [t1,t2] and 'grass' in [t3,t4]:
+                                #arbitrary, for powder move resistance
+                                num -= 0.5
+                            if 'dark' in [t1,t2] and 'dark' in [t3,t4]:
+                                #arbitrary, for prankster resistance
+                                num -= 0.5
+                            if set(['rock','ground','steel']) & set([t1,t2]):
+                                #arbitrary, for sandstorm defensive boost
+                                num -= 0.25
+                        if t4 == 'none' and SINGLE_TYPES_HIT_TWICE and not ONLY_USE_BEST_MOVE:
+                            num*=1.5
+                        if INCLUDE_PREVALENCE:
+                            num*= prevalence
+                        return num
+                    t3def = applyFilters(t3def)
+                    
+                 
+
                     if t4 != 'none':
                         t4def = damageFrom(t4, [t1,t2] if t2!= 'none' else t1)
-                        all_stats[name]["takes_damage_from"][t3][t4] = {t3: t3def, t4:t4def, 'sum':t3def+t4def, 'product': t3def*t4def }
-                        all_stats[name]["defensive_total"] += t4def**2 if t4def!= 0 else -2
+                        all_stats[name]["takes_damage_from"][t3][t4] = {t3: bestHitExplained(t3def,t4def,ONLY_USE_BEST_MOVE), t4:bestHitExplained(t4def,t3def,ONLY_USE_BEST_MOVE) }
                         if t4 not in all_stats[name]["takes_damage_from"]:
                             all_stats[name]["takes_damage_from"][t4] = {}
-                        all_stats[name]["takes_damage_from"][t4][t3] = {t3: t3def, t4:t4def, 'sum':t3def+t4def, 'product': t3def*t4def }
+                        all_stats[name]["takes_damage_from"][t4][t3] = {t3: bestHitExplained(t3def,t4def,ONLY_USE_BEST_MOVE), t4:bestHitExplained(t4def,t3def,ONLY_USE_BEST_MOVE) }
+                        t4def = applyFilters(t4def)
+                        if ONLY_USE_BEST_MOVE:
+                            t4def = max(t3def,t4def)
+                            t3def = 0
+                        all_stats[name]["defensive_total"] += t4def
+
+                    all_stats[name]["defensive_total"] += t3def
 
     for key in all_stats.keys():
         del all_stats[key]['types_done']
 
+
     worst_off_score = min([score for (name, score) in [(name,stats['offensive_total']) for (name, stats) in all_stats.items()]])
     worst_def_score = max([score for (name, score) in [(name,stats['defensive_total']) for (name, stats) in all_stats.items()]])
-    print(f'worst defensive score: {worst_def_score}')
-    print(f'worst offensive score: {worst_off_score}')
+    
 
     offensiveness = [(name,stats['offensive_total']- worst_off_score) for (name, stats) in all_stats.items()]
     defensiveness = [(name, (worst_def_score- stats['defensive_total'])) for (name, stats) in all_stats.items()]
@@ -114,40 +212,22 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False):
     best_off_score = sorted(offensiveness, key=lambda item: item[1], reverse=True)[0][1]
     best_def_score = sorted(defensiveness, key=lambda item: item[1], reverse=True)[0][1]
     defensiveness = [(key, round((x/best_def_score)*best_off_score,2)) for (key,x) in defensiveness]
-
-    off = sorted(offensiveness, key=lambda item: item[1], reverse=True)
-    print('top 10 offensive: ')
-    for item in off[:10]:
-        print(item)
-    print('worst 10 offensive: ')
-    for item in off[-10:]:
-        print(item)
-    deff = sorted(defensiveness, key=lambda item: item[1], reverse=True)
-    print('top 10 defensive: ')
-    for item in deff[:10]:
-        print(item)
-    print('worst 10 defensive: ')
-    for item in deff[-10:]:
-        print(item)
     final_scores = [(key, round(score + dict(defensiveness)[key],2)) for (key,score) in offensiveness]
-    final = sorted(final_scores, key=lambda item: item[1], reverse=True)
 
-    print('top 10 final score: ')
-    for item in final[:10]:
-        print(item)
-    print('worst 10 final score: ')
-    for item in final[-10:]:
-        print(item)
+    
+    for key in all_stats.keys():
+        all_stats[key]['offensive_total'] = round(all_stats[key]['offensive_total'],2)
+        all_stats[key]['defensive_total'] = round(all_stats[key]['defensive_total'],2)
 
 
     for i, item in enumerate(sorted(offensiveness, key=lambda item: item[1], reverse=True)):
-        all_stats[item[0]]['offensive_score'] = item[1]
+        all_stats[item[0]]['offensive_score'] = round(item[1],2)
         all_stats[item[0]]['offensive_score_placement'] = i  +1
     for i,item in enumerate(sorted(defensiveness, key=lambda item: item[1], reverse=True)):
-        all_stats[item[0]]['defensive_score'] = item[1]
+        all_stats[item[0]]['defensive_score'] = round(item[1],2)
         all_stats[item[0]]['defensive_score_placement'] = i+1
     for i,item in enumerate(sorted(final_scores, key=lambda item: item[1], reverse=True)):
-        all_stats[item[0]]['total_score'] = item[1]
+        all_stats[item[0]]['total_score'] = round(item[1],2)
         all_stats[item[0]]['total_score_placement'] = i+1
     final_json = {}
     for t1 in all_types:
@@ -169,8 +249,36 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False):
         final_json['total_ranks'][i] = item[0]
     return final_json
 
-def save_json(final_json):
-    with open('./all_types_squared.json','w') as f:
+def save_json(final_json, name):
+    with open(name,'w') as f:
         f.write(json.dumps(final_json))
 
-save_json(create_type_rank_dict(False))
+def title(a,b,c,d,e,f):
+    string = './all_types'
+    if a:
+        string += '_wsing'
+    if b:
+        string += '_4x'
+    if c:
+        string += '_singx2'
+    if d:
+        string += '_abil'
+    if e:
+        string += '_prev'
+    if f: 
+        string += '_1mov'
+    string += '.json'
+    return string 
+
+import itertools
+def createAllPermutations():
+    #really terrible way of doing this. but idc just wanna do this in 15 min nobody cares
+    for permutation in itertools.product([True,False], repeat=6):
+        name = title(*permutation)
+        print(name)
+        data = create_type_rank_dict(*permutation)
+        save_json(data, name)
+
+createAllPermutations()
+# all = getAllTypes()
+# print((all.count(('rock','fire'))+ all.count(('fire','rock')))/len(all))
