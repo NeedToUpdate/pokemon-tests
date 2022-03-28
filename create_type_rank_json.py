@@ -85,7 +85,6 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                     if not (t1,t2) in types_done:
                         types_done.append((t1,t2))
                     name = (t1 + ',' + t2) if t1!=t2 else t1
-                    takes_does_text = (' %' if INCLUDE_PREVALENCE else ' times')
                     if name not in all_stats:
                         all_stats[name] = {
                             "offensive_total": 0,
@@ -93,18 +92,18 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                             "types_done": [],
                             "does_damage_to": {},
                             "takes_damage_from": {},
-                            "does_4x": '0' + takes_does_text,
-                            "does_2x": '0' + takes_does_text,
-                            "does_neutral": '0' + takes_does_text,
-                            "does_0.5x": '0' + takes_does_text,
-                            "does_0.25x": '0' + takes_does_text,
-                            "does_0": '0' + takes_does_text,
-                            "takes_4x": '0' + takes_does_text,
-                            "takes_2x": '0' + takes_does_text,
-                            "takes_neutral": '0' + takes_does_text,
-                            "takes_0.5x": '0' + takes_does_text,
-                            "takes_0.25x": '0' + takes_does_text,
-                            "takes_0": '0' + takes_does_text,
+                            "does_4x":0,
+                            "does_2x":0,
+                            "does_neutral":0,
+                            "does_0.5x":0,
+                            "does_0.25x":0,
+                            "does_0":0,
+                            "takes_4x":0,
+                            "takes_2x":0,
+                            "takes_neutral":0,
+                            "takes_0.5x":0,
+                            "takes_0.25x":0,
+                            "takes_0":0,
                         }
                     if (t4,t3) in all_stats[name]['types_done'] or (t3,t4) in all_stats[name]['types_done']:
                         continue
@@ -124,13 +123,7 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
 
                     def recordDmg(dmg,takes=False):
                         def update(dmg_mult):
-                            
-                            if INCLUDE_PREVALENCE:
-                                old_val = float(all_stats[name][dmg_mult].split(' ')[0])
-                                new_val = round(old_val+ prevalence,2)
-                                all_stats[name][dmg_mult] = str(new_val) + takes_does_text
-                            else:
-                                all_stats[name][dmg_mult] = str(int(all_stats[name][dmg_mult].split(' ')[0])+ 1) + takes_does_text
+                            all_stats[name][dmg_mult] += 1
                         if dmg == 4:
                             if takes:
                                 update('takes_4x')
@@ -264,6 +257,22 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
 
     for key in all_stats.keys():
         del all_stats[key]['types_done']
+        for dmg_mult in ["does_4x"
+                        ,"does_2x"
+                        ,"does_neutral"
+                        ,"does_0.5x"
+                        ,"does_0.25x"
+                        ,"does_0"
+                        ,"takes_4x"
+                        ,"takes_2x"
+                        ,"takes_neutral"
+                        ,"takes_0.5x"
+                        ,"takes_0.25x"
+                        ,"takes_0"]:
+            # if INCLUDE_PREVALENCE:
+            #     all_stats[key][dmg_mult] = str(round( all_stats[key][dmg_mult],2)) + '%'
+            # else:
+            all_stats[key][dmg_mult] = str(all_stats[key][dmg_mult]) + 'times'
 
 
     worst_off_score = min([score for (name, score) in [(name,stats['offensive_total']) for (name, stats) in all_stats.items()]])
@@ -337,9 +346,9 @@ def title(a,b,c,d,e,f):
 import itertools
 def createAllPermutations():
     #really terrible way of doing this. but idc just wanna do this in 15 min nobody cares
-    for permutation in itertools.product([True,False], repeat=6):
+    for i,permutation in enumerate(itertools.product([True,False], repeat=6)):
         name = title(*permutation)
-        print(name)
+        print(name + '   ' + str(i) + '/' + str(2**6))
         data = create_type_rank_dict(*permutation)
         save_json(data, name)
 
