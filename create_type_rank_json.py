@@ -91,18 +91,18 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                             "types_done": [],
                             "does_damage_to": {},
                             "takes_damage_from": {},
-                            "does_4x":0,
-                            "does_2x":0,
-                            "does_neutral":0,
-                            "does_0.5x":0,
-                            "does_0.25x":0,
-                            "does_0":0,
-                            "takes_4x":0,
-                            "takes_2x":0,
-                            "takes_neutral":0,
-                            "takes_0.5x":0,
-                            "takes_0.25x":0,
-                            "takes_0":0,
+                            "does_4x": '0 times',
+                            "does_2x": '0 times',
+                            "does_neutral": '0 times',
+                            "does_0.5x": '0 times',
+                            "does_0.25x": '0 times',
+                            "does_0": '0 times',
+                            "takes_4x": '0 times',
+                            "takes_2x": '0 times',
+                            "takes_neutral": '0 times',
+                            "takes_0.5x": '0 times',
+                            "takes_0.25x": '0 times',
+                            "takes_0": '0 times',
                         }
                     if (t4,t3) in all_stats[name]['types_done'] or (t3,t4) in all_stats[name]['types_done']:
                         continue
@@ -121,36 +121,39 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                     t1dmg = damageFrom(t1, [t3,t4] if t4!= 'none' else t3)
 
                     def recordDmg(dmg,takes=False):
+                        number = 1
+                        if INCLUDE_PREVALENCE:
+                            number = round(prevalence,2)
                         if dmg == 4:
                             if takes:
-                                all_stats[name]['takes_4x'] += 1
+                                all_stats[name]['takes_4x'] = str(float(all_stats[name]['takes_4x'].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                             else:
-                                all_stats[name]['does_4x'] += 1
+                                all_stats[name]['does_4x'] = str(float(all_stats[name]['does_4x'].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                         if dmg == 2:
                             if takes:
-                                all_stats[name]["takes_2x"] += 1
+                                all_stats[name]["takes_2x"] = str(float(all_stats[name]["takes_2x"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                             else:
-                                all_stats[name]["does_2x"] += 1
+                                all_stats[name]["does_2x"] = str(float(all_stats[name]["does_2x"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                         if dmg == 1:
                             if takes:
-                                all_stats[name]["takes_neutral"] += 1
+                                all_stats[name]["takes_neutral"] = str(float(all_stats[name]["takes_neutral"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                             else:
-                                all_stats[name]["does_neutral"] += 1
+                                all_stats[name]["does_neutral"] = str(float(all_stats[name]["does_neutral"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                         if dmg == 0.5:
                             if takes:
-                                all_stats[name]["takes_0.5x"] += 1
+                                all_stats[name]["takes_0.5x"] = str(float(all_stats[name]["takes_0.5x"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                             else:
-                                all_stats[name]["does_0.5x"] += 1
+                                all_stats[name]["does_0.5x"] = str(float(all_stats[name]["does_0.5x"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                         if dmg == 0.25:
                             if takes:
-                                all_stats[name]["takes_0.25x"] += 1
+                                all_stats[name]["takes_0.25x"] = str(float(all_stats[name]["takes_0.25x"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                             else:
-                                all_stats[name]["does_0.25x"] += 1
+                                all_stats[name]["does_0.25x"] = str(float(all_stats[name]["does_0.25x"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                         if dmg == 0:
                             if takes:
-                                all_stats[name]["takes_0"] += 1
+                                all_stats[name]["takes_0"] = str(float(all_stats[name]["takes_0"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                             else:
-                                all_stats[name]["does_0"] += 1
+                                all_stats[name]["does_0"] = str(float(all_stats[name]["does_0"].split(' ')[0]) + number) + ' %' if INCLUDE_PREVALENCE else ' times'
                     recordDmg(t1dmg)
 
                     def applyFiltersOff(input):
