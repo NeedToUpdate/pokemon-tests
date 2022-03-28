@@ -63,7 +63,25 @@ def getAllTypes():
         all_pokemon.append(tuple(types))
     return all_pokemon
     
-
+def recordDmg(data,dmg,num,takes=False):
+    def update(dmg_mult):
+        data[dmg_mult] += num
+    string = 'takes_' if takes else 'does_'
+    if dmg == 4:
+        update(string + '4x')
+    elif dmg == 2:
+        update(string + "2x")
+    elif dmg == 1:
+        update(string + "neutral")
+    elif dmg == 0.5:
+        update(string + "0.5x")
+    elif dmg == 0.25:
+        update(string + "0.25x")
+    elif dmg == 0:
+        update(string + "0")
+    else:
+        print('oh  no')
+        print(dmg)
 
 def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, SINGLE_TYPES_HIT_TWICE = False, GIVE_BONUS_TO_ABILITIES=False, INCLUDE_PREVALENCE=False, ONLY_USE_BEST_MOVE=False):
     all_stats = {}
@@ -72,6 +90,10 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
     num_of_pokemon = len(every_type)
     for t1 in all_types:
         for t2 in all_types:
+            if (t2,t1)  in types_done:
+                continue
+            if not (t1,t2) in types_done:
+                types_done.append((t1,t2))
             for t3 in all_types:
                 for t4 in all_types:
                     if not INCLUDE_SINGLE_TYPES and (t1==t2 or t3==t4):
@@ -80,10 +102,7 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                         t2 = 'none'
                     if t3 == t4:
                         t4 = 'none'
-                    if (t2,t1)  in types_done:
-                        continue
-                    if not (t1,t2) in types_done:
-                        types_done.append((t1,t2))
+                  
                     name = (t1 + ',' + t2) if t1!=t2 else t1
                     if name not in all_stats:
                         all_stats[name] = {
@@ -110,51 +129,21 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                     if not (t3,t4) in all_stats[name]['types_done']:
                         all_stats[name]['types_done'].append((t3,t4))
 
+                    prevalence_count = 0
                     prevalence = 0
+                    
                     if INCLUDE_PREVALENCE:
-                        prevalence = every_type.count((t3,t4)) + every_type.count((t4,t3))
-                        prevalence = (prevalence/num_of_pokemon)*100
+                        prevalence_count = every_type.count((t3,t4)) + every_type.count((t4,t3))
+                        prevalence = (prevalence_count/num_of_pokemon)*100
                         self_prevalence = every_type.count((t1,t2)) + every_type.count((t2,t1))
                         self_prevalence = (self_prevalence/num_of_pokemon)*100
                         all_stats[name]['prevalence'] = str(round(self_prevalence,2)) + '%'
                     #offensive
-                    
-                    t1dmg = damageFrom(t1, [t3,t4] if t4!= 'none' else t3)
 
-                    def recordDmg(dmg,takes=False):
-                        def update(dmg_mult):
-                            all_stats[name][dmg_mult] += 1
-                        if dmg == 4:
-                            if takes:
-                                update('takes_4x')
-                            else:
-                               update("does_4x")
-                        if dmg == 2:
-                            if takes:
-                               update("takes_2x")
-                            else:
-                               update("does_2x")
-                        if dmg == 1:
-                            if takes:
-                               update("takes_neutral")
-                            else:
-                               update("does_neutral")
-                        if dmg == 0.5:
-                            if takes:
-                               update("takes_0.5x")
-                            else:
-                               update("does_0.5x")
-                        if dmg == 0.25:
-                            if takes:
-                               update("takes_0.25x")
-                            else:
-                               update("does_0.25x")
-                        if dmg == 0:
-                            if takes:
-                               update("takes_0")
-                            else:
-                               update("does_0")
-                    recordDmg(t1dmg)
+                    
+
+                    t1dmg = damageFrom(t1, [t3,t4] if t4!= 'none' else t3)
+                    
 
                     def applyFiltersOff(input):
                         num = input
@@ -187,26 +176,26 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                     
                     t1dmg_filt = applyFiltersOff(t1dmg)
 
-
+                    t2dmg = 0
                     if t2 != 'none':
                         t2dmg = damageFrom(t2, [t3,t4] if t4!= 'none' else t3)
-                        recordDmg(t2dmg)
                         all_stats[name]["does_damage_to"][t3][t4] = {t1: bestHitExplained(t1dmg,t2dmg,ONLY_USE_BEST_MOVE), t2:bestHitExplained(t2dmg,t1dmg,ONLY_USE_BEST_MOVE) }
                         if t4 not in all_stats[name]["does_damage_to"]:
                             all_stats[name]["does_damage_to"][t4] = {}
                         all_stats[name]["does_damage_to"][t4][t3] = {t1: bestHitExplained(t1dmg,t2dmg,ONLY_USE_BEST_MOVE), t2:bestHitExplained(t2dmg,t1dmg,ONLY_USE_BEST_MOVE) }
-                        t2dmg = applyFiltersOff(t2dmg)
+                        t2dmg_filt = applyFiltersOff(t2dmg)
                         if ONLY_USE_BEST_MOVE:
-                            t2dmg = max(t1dmg_filt,t2dmg)
+                            t2dmg_filt = max(t1dmg_filt,t2dmg_filt)
                             t1dmg_filt = 0
-                        all_stats[name]["offensive_total"] += t2dmg
+                        all_stats[name]["offensive_total"] += t2dmg_filt
                     all_stats[name]["offensive_total"] += t1dmg_filt
                    
+                    recordDmg(all_stats[name],max(t1dmg,t2dmg),1)
+
 
                     #defensive
 
                     t3def = damageFrom(t3, [t1,t2] if t2!= 'none' else t1)
-                    recordDmg(t3def,True)
                     if t3 not in all_stats[name]["takes_damage_from"]:
                         all_stats[name]["takes_damage_from"][t3] = {}
                     all_stats[name]["takes_damage_from"][t3][t4] = {t3: t3def}
@@ -239,40 +228,45 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                     t3def_filt = applyFilters(t3def)
                     
                  
-
+                    t4def = 0
                     if t4 != 'none':
                         t4def = damageFrom(t4, [t1,t2] if t2!= 'none' else t1)
-                        recordDmg(t4def, True)
                         all_stats[name]["takes_damage_from"][t3][t4] = {t3: bestHitExplained(t3def,t4def,ONLY_USE_BEST_MOVE), t4:bestHitExplained(t4def,t3def,ONLY_USE_BEST_MOVE) }
                         if t4 not in all_stats[name]["takes_damage_from"]:
                             all_stats[name]["takes_damage_from"][t4] = {}
                         all_stats[name]["takes_damage_from"][t4][t3] = {t3: bestHitExplained(t3def,t4def,ONLY_USE_BEST_MOVE), t4:bestHitExplained(t4def,t3def,ONLY_USE_BEST_MOVE) }
-                        t4def = applyFilters(t4def)
+                        t4def_filt = applyFilters(t4def)
                         if ONLY_USE_BEST_MOVE:
-                            t4def = max(t3def_filt,t4def)
+                            t4def_filt = max(t3def_filt,t4def_filt)
                             t3def_filt = 0
-                        all_stats[name]["defensive_total"] += t4def
+                        all_stats[name]["defensive_total"] += t4def_filt
 
                     all_stats[name]["defensive_total"] += t3def_filt
-
+                    recordDmg(all_stats[name],max(t3def,t4def),1,True)
+    all_dmg_keys = ["does_4x","does_2x","does_neutral","does_0.5x","does_0.25x","does_0","takes_4x","takes_2x","takes_neutral","takes_0.5x","takes_0.25x","takes_0"]
     for key in all_stats.keys():
         del all_stats[key]['types_done']
-        for dmg_mult in ["does_4x"
-                        ,"does_2x"
-                        ,"does_neutral"
-                        ,"does_0.5x"
-                        ,"does_0.25x"
-                        ,"does_0"
-                        ,"takes_4x"
-                        ,"takes_2x"
-                        ,"takes_neutral"
-                        ,"takes_0.5x"
-                        ,"takes_0.25x"
-                        ,"takes_0"]:
-            # if INCLUDE_PREVALENCE:
-            #     all_stats[key][dmg_mult] = str(round( all_stats[key][dmg_mult],2)) + '%'
-            # else:
-            all_stats[key][dmg_mult] = str(all_stats[key][dmg_mult]) + ' times'
+        for dmg_mult in all_dmg_keys:
+            if INCLUDE_PREVALENCE:
+                all_stats[key][dmg_mult] = 0
+            else:
+                all_stats[key][dmg_mult] = str(int(all_stats[key][dmg_mult])) + ' times'
+
+    if INCLUDE_PREVALENCE:
+        for t1 in all_types:
+            for t2 in all_types:
+                name = t1 + ',' + t2
+                if name not in all_stats:
+                    continue
+                for type in every_type:
+                    defender_type = [type[0],type[1]] if type[1] != 'none' else type[0]
+                    attack = max(damageFrom(t1,defender_type) , (damageFrom(t2,defender_type) if t2 != 'none' else 0))
+                    recordDmg(all_stats[name],attack,1)
+                    defence = max(damageFrom(type[0],defender_type) , (damageFrom(type[1],defender_type) if type[1] != 'none' else 0))
+                    recordDmg(all_stats[name],defence,1,True)
+                for dmg_mult in all_dmg_keys:
+                    all_stats[name][dmg_mult] =  str(round((all_stats[name][dmg_mult]/num_of_pokemon)*100,2))  + '%'
+                    
 
 
     worst_off_score = min([score for (name, score) in [(name,stats['offensive_total']) for (name, stats) in all_stats.items()]])
@@ -348,11 +342,8 @@ def createAllPermutations():
     #really terrible way of doing this. but idc just wanna do this in 15 min nobody cares
     for i,permutation in enumerate(itertools.product([True,False], repeat=6)):
         name = title(*permutation)
-        print(name + '   ' + str(i) + '/' + str(2**6))
+        print(name + '   ' + str(i+1) + '/' + str(2**6))
         data = create_type_rank_dict(*permutation)
         save_json(data, name)
 
 createAllPermutations()
-# all = getAllTypes()
-# print((all.count(('rock','fire'))+ all.count(('fire','rock')))/len(all))
-# print(create_type_rank_dict(False,False,False,False,True,False)['rock']['steel']['does_2x'])
