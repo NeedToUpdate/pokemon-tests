@@ -168,13 +168,19 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                         if GIVE_BONUS_TO_ABILITIES:
                             if 'grass' in [t1,t2] and 'grass' in [t3,t4]:
                                 #arbitrary, for powder move resistance
-                                num -= 0.5
+                                num -= 0.2
                             if 'dark' in [t1,t2] and 'dark' in [t3,t4]:
                                 #arbitrary, for prankster resistance
-                                num -= 0.5
+                                num -= 0.2
+                            if 'fire' in [t1,t2] and 'fire' in [t3,t4]:
+                                #arbitrary, for powder move resistance
+                                num -= 0.2
+                            if 'electric' in [t1,t2] and 'electric' in [t3,t4]:
+                                #arbitrary, for prankster resistance
+                                num -= 0.2
                             if set(['rock','ground','steel']) & set([t1,t2]):
                                 #arbitrary, for sandstorm defensive boost
-                                num -= 0.25
+                                num -= 0.1
                         if t4 == 'none' and SINGLE_TYPES_HIT_TWICE and not ONLY_USE_BEST_MOVE:
                             num*=1.5
                         if INCLUDE_PREVALENCE:
