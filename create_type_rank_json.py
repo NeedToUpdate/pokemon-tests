@@ -97,6 +97,12 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                             "does_0.5x":0,
                             "does_0.25x":0,
                             "does_0":0,
+                            "takes_4x":0,
+                            "takes_2x":0,
+                            "takes_neutral":0,
+                            "takes_0.5x":0,
+                            "takes_0.25x":0,
+                            "takes_0":0,
                         }
                     if (t4,t3) in all_stats[name]['types_done'] or (t3,t4) in all_stats[name]['types_done']:
                         continue
@@ -114,19 +120,37 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                     
                     t1dmg = damageFrom(t1, [t3,t4] if t4!= 'none' else t3)
 
-                    def recordDmg(dmg):
+                    def recordDmg(dmg,takes=False):
                         if dmg == 4:
-                            all_stats[name]['does_4x'] += 1
+                            if takes:
+                                all_stats[name]['takes_4x'] += 1
+                            else:
+                                all_stats[name]['does_4x'] += 1
                         if dmg == 2:
-                            all_stats[name]["does_2x"] += 1
+                            if takes:
+                                all_stats[name]["takes_2x"] += 1
+                            else:
+                                all_stats[name]["does_2x"] += 1
                         if dmg == 1:
-                            all_stats[name]["does_neutral"] += 1
+                            if takes:
+                                all_stats[name]["takes_neutral"] += 1
+                            else:
+                                all_stats[name]["does_neutral"] += 1
                         if dmg == 0.5:
-                            all_stats[name]["does_0.5x"] += 1
+                            if takes:
+                                all_stats[name]["takes_0.5x"] += 1
+                            else:
+                                all_stats[name]["does_0.5x"] += 1
                         if dmg == 0.25:
-                            all_stats[name]["does_0.25x"] += 1
+                            if takes:
+                                all_stats[name]["takes_0.25x"] += 1
+                            else:
+                                all_stats[name]["does_0.25x"] += 1
                         if dmg == 0:
-                            all_stats[name]["does_0"] += 1
+                            if takes:
+                                all_stats[name]["takes_0"] += 1
+                            else:
+                                all_stats[name]["does_0"] += 1
                     recordDmg(t1dmg)
 
                     def applyFiltersOff(input):
@@ -179,6 +203,7 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                     #defensive
 
                     t3def = damageFrom(t3, [t1,t2] if t2!= 'none' else t1)
+                    recordDmg(t3def,True)
                     if t3 not in all_stats[name]["takes_damage_from"]:
                         all_stats[name]["takes_damage_from"][t3] = {}
                     all_stats[name]["takes_damage_from"][t3][t4] = {t3: t3def}
@@ -214,6 +239,7 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
 
                     if t4 != 'none':
                         t4def = damageFrom(t4, [t1,t2] if t2!= 'none' else t1)
+                        recordDmg(t4def, True)
                         all_stats[name]["takes_damage_from"][t3][t4] = {t3: bestHitExplained(t3def,t4def,ONLY_USE_BEST_MOVE), t4:bestHitExplained(t4def,t3def,ONLY_USE_BEST_MOVE) }
                         if t4 not in all_stats[name]["takes_damage_from"]:
                             all_stats[name]["takes_damage_from"][t4] = {}
