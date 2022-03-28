@@ -276,13 +276,13 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
 
     for i, item in enumerate(sorted(offensiveness, key=lambda item: item[1], reverse=True)):
         all_stats[item[0]]['offensive_score'] = round(item[1],2)
-        all_stats[item[0]]['offensive_score_placement'] = i  +1
+        all_stats[item[0]]['offensive_score_placement'] = ' #' + str(i+1)
     for i,item in enumerate(sorted(defensiveness, key=lambda item: item[1], reverse=True)):
         all_stats[item[0]]['defensive_score'] = round(item[1],2)
-        all_stats[item[0]]['defensive_score_placement'] = i+1
+        all_stats[item[0]]['defensive_score_placement'] = ' #' + str(i+1)
     for i,item in enumerate(sorted(final_scores, key=lambda item: item[1], reverse=True)):
         all_stats[item[0]]['total_score'] = round(item[1],2)
-        all_stats[item[0]]['total_score_placement'] = i+1
+        all_stats[item[0]]['total_score_placement'] = ' #' + str(i+1)
     final_json = {}
     for t1 in all_types:
         if t1 not in final_json:
