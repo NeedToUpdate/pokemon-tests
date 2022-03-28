@@ -246,7 +246,7 @@
         </div>
         <div v-if="!loading"
             class="options-box">
-            <h5 class="title">Choose your own sorting then click button:</h5>
+            <h5 class="big-title">Choose your own sorting then click button:</h5>
             <div class="check-group">
                 <input v-model="with_singles"
                     type="checkbox"
@@ -297,12 +297,19 @@
     </div>
 </body>
 <style>
+    * {
+        box-sizing: border-box;
+        font-family: sans-serif;
+    }
+
     body {
         padding: 1rem 0;
     }
 
-    .title {
-        color: darkblue
+    .big-title {
+        font-size: 1.2rem;
+        color: darkblue;
+        margin-bottom: 0.4rem;
     }
 
     .check-group {
@@ -312,6 +319,7 @@
         border-radius: 0.3rem;
         padding: 0.5rem;
         margin: 0.5rem 0;
+        max-width: 500px;
     }
 
     .options-box {
