@@ -114,7 +114,7 @@ def create_type_rank_dict(INCLUDE_SINGLE_TYPES = False, MAKE_4X_IMPORANT=False, 
                             num = num**2
                         if GIVE_BONUS_TO_ABILITIES:
                             if set([t1,t2]) & set(['water','fire']):
-                                num +=0.25 
+                                num +=0.10 
                         if t2 == 'none' and SINGLE_TYPES_HIT_TWICE and not ONLY_USE_BEST_MOVE:
                             num *=1.5
                         if INCLUDE_PREVALENCE:
