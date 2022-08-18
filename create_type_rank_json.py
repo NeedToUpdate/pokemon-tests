@@ -321,7 +321,7 @@ def save_json(final_json, name):
         f.write(json.dumps(final_json))
 
 def title(a,b,c,d,e,f):
-    string = './all_types'
+    string = './jsons/all_types'
     if a:
         string += '_wsing'
     if b:
